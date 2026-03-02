@@ -40,7 +40,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 IMG_SIZE = 128
 VAL_MEAN = [0.485, 0.456, 0.406]
 VAL_STD  = [0.229, 0.224, 0.225]
-CONFIDENCE_THRESHOLD = 0.85  # only keep if model is sure
+BATCH_SIZE = 64  # run inference in smaller chunks to avoid GPU OOM
+CONFIDENCE_THRESHOLD = 0.9  # only keep if model is sure
 
 # Visual style for each class
 CLASS_STYLE = {
@@ -115,7 +116,7 @@ def get_val_transform():
 
 # ── blob / ellipse proposal (public OpenCV only) ──────────────────────────────
 
-def create_blob_detector(min_area=20, max_area=50000, min_circularity=0.3):
+def create_blob_detector(min_area=50, max_area=200, min_circularity=0.8):
     """
     Construct a SimpleBlobDetector tuned for bright or dark round-ish blobs.
 
@@ -211,15 +212,22 @@ def run_filter(model, patches_rgb, transform, device):
         pil = Image.fromarray(patch)
         tensors.append(transform(pil))
 
-    batch = torch.stack(tensors).to(device)
+    all_preds = []
+    all_confs = []
 
     with torch.no_grad():
-        logits = model(batch)
-        probs = torch.softmax(logits, dim=1)
-        preds = probs.argmax(dim=1)
-        confidences = probs.max(dim=1).values
+        for i in range(0, len(tensors), BATCH_SIZE):
+            batch = torch.stack(tensors[i : i + BATCH_SIZE]).to(device)
+            logits = model(batch)
+            probs = torch.softmax(logits, dim=1)
+            preds = probs.argmax(dim=1)
+            confidences = probs.max(dim=1).values
+            all_preds.append(preds)
+            all_confs.append(confidences)
 
-    return preds.cpu().numpy(), confidences.cpu().numpy()
+    preds = torch.cat(all_preds, dim=0).cpu().numpy()
+    confidences = torch.cat(all_confs, dim=0).cpu().numpy()
+    return preds, confidences
 
 
 # ── main processing ───────────────────────────────────────────────────────────
@@ -400,13 +408,21 @@ def main():
         action="store_true",
         help="Save result plots alongside test images",
     )
+    parser.add_argument(
+        "--cpu",
+        action="store_true",
+        help="Force CPU even if CUDA is available (use if GPU runs out of memory)",
+    )
     args = parser.parse_args()
 
     test_dir = Path(args.test_dir)
     if not test_dir.is_dir():
         raise FileNotFoundError(f"Test directory not found: {test_dir}")
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if args.cpu:
+        device = torch.device("cpu")
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\nDevice : {device}")
     if device.type == "cuda":
         print(f"GPU    : {torch.cuda.get_device_name(0)}")

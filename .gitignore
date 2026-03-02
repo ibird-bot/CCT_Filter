@@ -10,9 +10,6 @@ __pycache__/
 data/
 results/
 
-# Local test images
-test_data/
-
 # Private / local test harness using proprietary ellipse fitting
 test.py
 

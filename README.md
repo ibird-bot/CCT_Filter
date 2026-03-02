@@ -110,11 +110,13 @@ You can customize paths and saving:
 python test_blob.py \
   --test_dir ./my_images \
   --model_path ./data/results/best_model.pth \
+  --cpu \
   --save
 ```
 
 - `--test_dir` – folder containing your own images.
 - `--model_path` – path to a compatible `best_model.pth` and its `class_map.json`.
+- `--cpu` – force CPU inference (use this if you see CUDA out-of-memory errors).
 - `--save` – additionally writes `{image_stem}_filtered_blob.png` next to each input.
 
 #### 3.3. Confidence threshold
