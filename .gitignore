@@ -1,0 +1,28 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+*.log
+
+# Training data and results
+data/
+results/
+
+# Local test images
+test_data/
+
+# Private / local test harness using proprietary ellipse fitting
+test.py
+
+# Temporary or checkpoint files
+*.ckpt
+*.pth
+*.pt
+
+# IDE / editor
+.vscode/
+.idea/
+.cursor/
+
