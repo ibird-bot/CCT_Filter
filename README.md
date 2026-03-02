@@ -1,6 +1,6 @@
 ## Photogrammetry Target Classifier (CCT_Filter)
 
-This project trains a classifier to distinguish between **coded targets**, **uncoded targets**, and **non‑targets** from image patches. It also includes a **public-only test script** (`test_blob.py`) that uses OpenCV’s blob detector (no private ellipse-fitting code) to propose candidate detections on arbitrary images.
+This project trains a classifier to distinguish between **coded targets**, **uncoded targets**, and **non‑targets** from image patches. It also includes a **public-only test script** (`test_blob.py`) that uses OpenCV’s blob detector to propose candidate detections on arbitrary images.
 
 ---
 
