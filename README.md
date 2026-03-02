@@ -37,7 +37,7 @@ If you want to retrain the model:
 2. Run the augmentation / preparation script:
 
 ```bash
-python augment.py      # or python prepare_data.py if you rename it
+python augment.py
 ```
 
 3. Train the EfficientNet classifier:
@@ -51,7 +51,9 @@ This will create:
 - `data/results/best_model.pth`
 - `data/results/class_map.json`
 
-These are used by `test_blob.py` for inference.
+These are used by `test_blob.py` for inference. Because `data/` is in `.gitignore`,
+you need to **train locally** to produce these files, or download compatible
+weights from a release (if provided on GitHub in the future).
 
 ---
 
@@ -127,8 +129,31 @@ Any prediction with confidence below this threshold is treated as **not_target**
 
 ---
 
-### 4. Notes on privacy and data
+### 4. Demo image
+
+To make the project immediately understandable to new visitors, you can add a
+demo overlay image:
+
+1. Run `test_blob.py` on a representative image.
+2. Take a screenshot of the Matplotlib window showing green/blue/red markers.
+3. Save it as `assets/demo.png` in the repo root.
+
+Once that file exists, you can embed it in your GitHub description or here:
+
+```markdown
+![Blob-based target filtering demo](assets/demo.png)
+```
+
+This repository does **not** include any copyrighted source imagery; `assets/demo.png`
+should be generated from your own data or from images you have rights to share.
+
+---
+
+### 5. Notes on privacy and data
 
 - **Your images are never committed**: `data/` and `test_data/` are in `.gitignore`.
-- `test_blob.py` uses only **public OpenCV APIs** and your local model; it does **not** depend on any private ellipse-fitting implementation.
+- `data/results/` (including `best_model.pth`) is also ignored by default; consumers
+  must either train locally or download weights from a release you publish.
+- `test_blob.py` uses only **public OpenCV APIs** and your local model; it does
+  **not** depend on any private ellipse-fitting implementation.
 
